@@ -90,6 +90,12 @@ const App: React.FC = () => {
     }
   };
 
+  const isKeyValid = useCallback(() => {
+    if (activeEngine === 'gemini') return hasGeminiKey && !isGeminiInvalid;
+    if (activeEngine === 'groq') return groqKey.trim().length >= 10 && !isGroqInvalid;
+    return false;
+  }, [activeEngine, hasGeminiKey, isGeminiInvalid, groqKey, isGroqInvalid]);
+
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
@@ -104,6 +110,15 @@ const App: React.FC = () => {
   };
 
   const addAssetsFromFiles = useCallback((files: File[]) => {
+    if (!isKeyValid()) {
+      if (activeEngine === 'gemini') {
+        handleSelectGeminiKey();
+      } else {
+        alert("Please enter and lock a valid Groq API Key first.");
+      }
+      return;
+    }
+
     const newAssets: Asset[] = files.map((file) => ({
       id: crypto.randomUUID(),
       file,
@@ -116,7 +131,7 @@ const App: React.FC = () => {
         : undefined
     }));
     setAssets((prev) => [...newAssets, ...prev]);
-  }, []);
+  }, [isKeyValid, activeEngine]);
 
   const runGeneration = async (targetAsset: Asset) => {
     if (!navigator.onLine) {
@@ -162,13 +177,9 @@ const App: React.FC = () => {
   const handleGenerateAll = async () => {
     if (isGenerating) return;
     
-    if (activeEngine === 'gemini' && !hasGeminiKey) {
-      handleSelectGeminiKey();
-      return;
-    }
-    if (activeEngine === 'groq' && groqKey.length < 10) {
-      setIsGroqLocked(false);
-      alert("Please enter and lock a valid Groq API Key first.");
+    if (!isKeyValid()) {
+      if (activeEngine === 'gemini') handleSelectGeminiKey();
+      else alert("Please enter and lock a valid Groq API Key first.");
       return;
     }
 
@@ -249,6 +260,7 @@ const App: React.FC = () => {
   };
 
   const successCount = assets.filter(a => a.status === 'success').length;
+  const keyReady = isKeyValid();
 
   return (
     <div 
@@ -278,7 +290,9 @@ const App: React.FC = () => {
 
       {isDraggingGlobally && (
         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-3xl flex items-center justify-center pointer-events-none border-[12px] border-dashed border-white/20 m-6 rounded-[56px]">
-          <h2 className="text-6xl font-[900] text-white uppercase tracking-tighter animate-pulse text-center px-10">DROP UNLIMITED ASSETS</h2>
+          <h2 className="text-6xl font-[900] text-white uppercase tracking-tighter animate-pulse text-center px-10">
+            {keyReady ? 'DROP UNLIMITED ASSETS' : 'KEY REQUIRED TO ADD'}
+          </h2>
         </div>
       )}
 
@@ -408,15 +422,35 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <div className="glass p-10 rounded-[40px] flex flex-col items-center justify-center text-center relative group overflow-hidden border-2 border-dashed border-white/10 hover:border-white/40 transition-all cursor-pointer">
-          <input type="file" multiple onChange={(e) => addAssetsFromFiles(Array.from(e.target.files || []))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+        <div className={`glass p-10 rounded-[40px] flex flex-col items-center justify-center text-center relative group overflow-hidden border-2 border-dashed transition-all ${
+          !keyReady 
+          ? 'border-red-500/20 bg-red-500/5 cursor-not-allowed opacity-60' 
+          : 'border-white/10 hover:border-white/40 cursor-pointer'
+        }`}>
+          <input 
+            type="file" 
+            multiple 
+            disabled={!keyReady}
+            onChange={(e) => addAssetsFromFiles(Array.from(e.target.files || []))} 
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed" 
+          />
           <div className="space-y-6 pointer-events-none group-hover:scale-110 transition-transform duration-500">
-            <div className="w-24 h-24 bg-white/5 rounded-[32px] flex items-center justify-center mx-auto border border-white/10 shadow-inner">
-              <svg className="w-10 h-10 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+            <div className={`w-24 h-24 rounded-[32px] flex items-center justify-center mx-auto border shadow-inner transition-colors ${
+              !keyReady ? 'bg-red-500/10 border-red-500/20' : 'bg-white/5 border-white/10'
+            }`}>
+              {!keyReady ? (
+                <svg className="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+              ) : (
+                <svg className="w-10 h-10 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+              )}
             </div>
             <div>
-              <p className="text-[12px] text-white font-black uppercase tracking-[0.2em]">Add Assets</p>
-              <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest mt-1">Unlimited Pipeline</p>
+              <p className={`text-[12px] font-black uppercase tracking-[0.2em] ${!keyReady ? 'text-red-400' : 'text-white'}`}>
+                {!keyReady ? 'Locked: Key Required' : 'Add Assets'}
+              </p>
+              <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest mt-1">
+                {!keyReady ? 'Activate Engine First' : 'Unlimited Pipeline'}
+              </p>
             </div>
           </div>
         </div>
@@ -449,7 +483,7 @@ const App: React.FC = () => {
       </section>
 
       <footer className="mt-auto py-16 text-center border-t border-white/5">
-        <p className="text-[11px] font-black text-white/5 uppercase tracking-[0.7em]">Autometagen AI • User Key Pipeline by Tabo • v3.8</p>
+        <p className="text-[11px] font-black text-white/5 uppercase tracking-[0.7em]">Autometagen AI • User Key Pipeline by Tabo • v3.9</p>
       </footer>
     </div>
   );
