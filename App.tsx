@@ -16,7 +16,12 @@ const App: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showGuide, setShowGuide] = useState(false);
+  
+  // Key States
   const [hasGeminiKey, setHasGeminiKey] = useState(false);
+  const [isGeminiInvalid, setIsGeminiInvalid] = useState(false);
+  const [isGroqLocked, setIsGroqLocked] = useState(true);
+  const [isGroqInvalid, setIsGroqInvalid] = useState(false);
   
   const [activeEngine, setActiveEngine] = useState<AIEngine>(() => {
     return (localStorage.getItem('tabo_engine') as AIEngine) || 'gemini';
@@ -80,7 +85,8 @@ const App: React.FC = () => {
   const handleSelectGeminiKey = async () => {
     if (window.aistudio?.openSelectKey) {
       await window.aistudio.openSelectKey();
-      setHasGeminiKey(true); // Assume success per instructions
+      setHasGeminiKey(true);
+      setIsGeminiInvalid(false);
     }
   };
 
@@ -123,12 +129,30 @@ const App: React.FC = () => {
         engine: activeEngine,
         groqKey: groqKey
       });
+      
+      // Success: Auto-lock and Mark as Valid
+      if (activeEngine === 'gemini') {
+        setHasGeminiKey(true);
+        setIsGeminiInvalid(false);
+      } else {
+        setIsGroqLocked(true);
+        setIsGroqInvalid(false);
+      }
+
       setAssets((prev) => prev.map(a => a.id === targetAsset.id ? { ...a, status: 'success', metadata } : a));
     } catch (error: any) {
        console.error(error);
-       if (error?.message?.includes('entity was not found') || error?.status === 404) {
-          setHasGeminiKey(false);
-          setAssets(prev => prev.map(a => a.id === targetAsset.id ? { ...a, status: 'error', error: 'Gemini Key Invalid. Please re-select.' } : a));
+       const isKeyError = error?.message?.includes('entity was not found') || error?.status === 404 || error?.message?.includes('401') || error?.message?.includes('Unauthorized');
+       
+       if (isKeyError) {
+          if (activeEngine === 'gemini') {
+            setHasGeminiKey(false);
+            setIsGeminiInvalid(true);
+          } else {
+            setIsGroqLocked(false);
+            setIsGroqInvalid(true);
+          }
+          setAssets(prev => prev.map(a => a.id === targetAsset.id ? { ...a, status: 'error', error: 'API Key Invalid. Please update your key.' } : a));
        } else {
           setAssets((prev) => prev.map(a => a.id === targetAsset.id ? { ...a, status: 'error', error: error?.message || 'AI Engine Error' } : a));
        }
@@ -138,13 +162,13 @@ const App: React.FC = () => {
   const handleGenerateAll = async () => {
     if (isGenerating) return;
     
-    // Key validation
     if (activeEngine === 'gemini' && !hasGeminiKey) {
       handleSelectGeminiKey();
       return;
     }
     if (activeEngine === 'groq' && groqKey.length < 10) {
-      alert("Please enter a valid Groq API Key first.");
+      setIsGroqLocked(false);
+      alert("Please enter and lock a valid Groq API Key first.");
       return;
     }
 
@@ -286,32 +310,55 @@ const App: React.FC = () => {
             <button onClick={() => setActiveEngine('groq')} className={`flex-1 lg:flex-none px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeEngine === 'groq' ? 'bg-white text-black' : 'text-white/30 hover:text-white/50'}`}>Groq</button>
           </div>
           
-          <div className="w-full lg:w-auto min-w-[240px]">
+          <div className="w-full lg:w-auto min-w-[260px]">
             {activeEngine === 'gemini' ? (
-              <div className="flex items-center gap-2 bg-black/20 p-2 rounded-xl border border-white/5">
-                <div className={`w-2 h-2 rounded-full animate-pulse ${hasGeminiKey ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'}`} />
-                <span className="text-[9px] font-black text-white/40 uppercase tracking-widest flex-1">
-                  {hasGeminiKey ? 'Gemini Active (User Key)' : 'No Gemini Key Detected'}
+              <div className={`flex items-center gap-2 p-2 rounded-xl border transition-all ${isGeminiInvalid ? 'bg-red-500/10 border-red-500/30' : hasGeminiKey ? 'bg-green-500/10 border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.1)]' : 'bg-black/20 border-white/5'}`}>
+                <a 
+                  href="https://aistudio.google.com/app/apikey" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-white/5 text-white/40 hover:bg-white/10 hover:text-white transition-all group/key"
+                  title="Browse keys in AI Studio Storage"
+                >
+                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+                </a>
+                <span className={`text-[9px] font-black uppercase tracking-widest flex-1 ${isGeminiInvalid ? 'text-red-400' : hasGeminiKey ? 'text-green-400' : 'text-white/40'}`}>
+                  {isGeminiInvalid ? 'Invalid / Expired' : hasGeminiKey ? 'Gemini Autolocked' : 'Browse & Pick Key'}
                 </span>
                 <button 
                   onClick={handleSelectGeminiKey}
-                  className="px-3 py-1 bg-white/5 hover:bg-white/10 text-[9px] font-black text-white uppercase rounded-md border border-white/10 transition-colors"
+                  className={`px-3 py-1.5 text-[9px] font-black uppercase rounded-lg border transition-all active:scale-95 ${isGeminiInvalid ? 'bg-red-500 text-white border-red-400' : 'bg-white/5 hover:bg-white text-white hover:text-black border-white/10'}`}
                 >
-                  {hasGeminiKey ? 'Change Key' : 'Activate Key'}
+                  {isGeminiInvalid ? 'Fix Key' : hasGeminiKey ? 'Change' : 'Activate'}
                 </button>
               </div>
             ) : (
-              <div className="relative group">
+              <div className={`flex items-center gap-2 p-1.5 rounded-xl border transition-all ${isGroqInvalid ? 'bg-red-500/10 border-red-500/30' : isGroqLocked && groqKey ? 'bg-green-500/10 border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.1)]' : 'bg-black/20 border-white/10'}`}>
+                <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-white/5 text-white/20">
+                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                </div>
                 <input 
                   type="password" 
                   value={groqKey} 
-                  onChange={(e) => setGroqKey(e.target.value)} 
-                  placeholder="Enter Personal Groq API Key"
-                  className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-[10px] text-white focus:outline-none w-full focus:border-white/30 transition-all placeholder:text-white/10"
+                  disabled={isGroqLocked}
+                  onChange={(e) => {
+                    setGroqKey(e.target.value);
+                    setIsGroqInvalid(false);
+                  }} 
+                  placeholder="Paste Groq Key"
+                  className={`bg-transparent px-3 py-1.5 text-[10px] text-white focus:outline-none flex-1 placeholder:text-white/10 disabled:opacity-50 ${isGroqInvalid ? 'text-red-400' : ''}`}
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                   <div className={`w-1.5 h-1.5 rounded-full ${groqKey.length > 10 ? 'bg-green-500' : 'bg-white/10'}`} />
-                </div>
+                <button 
+                  onClick={() => setIsGroqLocked(!isGroqLocked)}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isGroqInvalid ? 'bg-red-500/20 text-red-400' : isGroqLocked ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/40 hover:bg-white/20'}`}
+                  title={isGroqInvalid ? "Key Invalid" : isGroqLocked ? "Unlock to Change" : "Lock Key"}
+                >
+                  {isGroqLocked ? (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0v4m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2z" /></svg>
+                  )}
+                </button>
               </div>
             )}
           </div>
@@ -400,7 +447,7 @@ const App: React.FC = () => {
       </section>
 
       <footer className="mt-auto py-16 text-center border-t border-white/5">
-        <p className="text-[11px] font-black text-white/5 uppercase tracking-[0.7em]">Autometagen AI • Professional Pipeline • v3.5</p>
+        <p className="text-[11px] font-black text-white/5 uppercase tracking-[0.7em]">Autometagen AI • Professional Pipeline • v3.8</p>
       </footer>
     </div>
   );
