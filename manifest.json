@@ -1,7 +1,7 @@
 
 {
-  "short_name": "Tabo AI",
-  "name": "Tabo Autometagen AI",
+  "short_name": "Autometa AI",
+  "name": "Autometagen AI by Tabo",
   "icons": [
     {
       "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'%3E%3Cpath d='M50 5L90 25V75L50 95L10 75V25L50 5Z' stroke='white' stroke-width='4'/%3E%3Cpath d='M30 35H70' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3Cpath d='M50 35V75' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E",

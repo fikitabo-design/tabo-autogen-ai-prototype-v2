@@ -203,7 +203,7 @@ const App: React.FC = () => {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `tabo_autometagen_${platform.toLowerCase().replace(' ', '_')}_${new Date().getTime()}.csv`;
+    link.download = `autometagen_${platform.toLowerCase().replace(' ', '_')}_${new Date().getTime()}.csv`;
     link.click();
   };
 
@@ -240,15 +240,18 @@ const App: React.FC = () => {
         
         <div className="flex-1">
           <div className="flex items-center gap-4 mb-2">
-             <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg transform rotate-3">
-               <svg className="w-9 h-9 text-black" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+             <div className="w-16 h-16 bg-white rounded-2xl flex-shrink-0 flex items-center justify-center shadow-lg transform rotate-3">
+               <svg className="w-10 h-10 text-black" viewBox="0 0 100 100" fill="none" stroke="currentColor">
                  <path d="M50 5L90 25V75L50 95L10 75V25L50 5Z" stroke="currentColor" strokeWidth="6" />
                  <path d="M30 35H70" stroke="currentColor" strokeWidth="10" strokeLinecap="round" />
                  <path d="M50 35V75" stroke="currentColor" strokeWidth="10" strokeLinecap="round" />
                </svg>
              </div>
              <div className="flex flex-col">
-               <h1 className="text-4xl sm:text-5xl font-[900] tracking-tighter text-white">TABO <span className="text-white/20">AUTOMETAGEN</span></h1>
+               <h1 className="text-3xl sm:text-4xl font-[900] tracking-tighter text-white leading-none">AUTOMETAGEN AI</h1>
+               <div className="flex items-center gap-2 mt-1">
+                 <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full font-black text-white/60 tracking-widest uppercase">BY TABO</span>
+               </div>
                {deferredPrompt && (
                  <button 
                   onClick={handleInstallClick}
@@ -314,15 +317,22 @@ const App: React.FC = () => {
 
       <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 glass p-10 rounded-[40px] space-y-10 shadow-xl">
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-2">Marketplace Target</label>
-            <div className="relative">
-              <select value={platform} onChange={(e) => setPlatform(e.target.value as Platform)} className="w-full bg-black/60 border border-white/10 rounded-3xl px-6 py-5 text-sm text-white focus:outline-none appearance-none cursor-pointer hover:border-white/20 transition-all">
-                {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
-              <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-              </div>
+          <div className="space-y-4">
+            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-2 block">Marketplace Target</label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {PLATFORMS.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPlatform(p)}
+                  className={`px-4 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                    platform === p 
+                    ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
+                    : 'bg-black/40 text-white/40 border-white/10 hover:border-white/30 hover:text-white/70'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
             </div>
           </div>
           <button 
@@ -331,7 +341,7 @@ const App: React.FC = () => {
             className="w-full py-6 bg-white text-black rounded-[28px] font-black text-sm uppercase tracking-[0.3em] disabled:opacity-20 shadow-2xl hover:scale-[1.01] transition-all relative overflow-hidden group"
           >
             <span className="relative z-10">
-              {!isReady ? `Link ${activeEngine.toUpperCase()} Key to Start` : isGenerating ? 'Processing Data...' : `Execute Tabo Meta • ${assets.length} items`}
+              {!isReady ? `Link ${activeEngine.toUpperCase()} Key to Start` : isGenerating ? 'Processing Data...' : `Execute AutoMeta • ${assets.length} items`}
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
           </button>
@@ -387,7 +397,7 @@ const App: React.FC = () => {
       </section>
 
       <footer className="mt-auto py-16 text-center border-t border-white/5">
-        <p className="text-[11px] font-black text-white/5 uppercase tracking-[0.7em]">Tabo Autometagen Network • Ver 6.0.0</p>
+        <p className="text-[11px] font-black text-white/5 uppercase tracking-[0.7em]">Autometagen Network • Powered by Tabo • Ver 6.1.1</p>
       </footer>
     </div>
   );
