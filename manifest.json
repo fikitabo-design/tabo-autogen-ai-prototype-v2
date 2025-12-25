@@ -1,0 +1,21 @@
+
+{
+  "short_name": "Tabo AI",
+  "name": "Tabo Autometagen AI",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'%3E%3Cpath d='M50 5L90 25V75L50 95L10 75V25L50 5Z' stroke='white' stroke-width='4'/%3E%3Cpath d='M30 35H70' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3Cpath d='M50 35V75' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'%3E%3Cpath d='M50 5L90 25V75L50 95L10 75V25L50 5Z' stroke='white' stroke-width='4'/%3E%3Cpath d='M30 35H70' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3Cpath d='M50 35V75' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#0a0a0a",
+  "background_color": "#0a0a0a"
+}
