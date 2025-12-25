@@ -295,7 +295,7 @@ const App: React.FC = () => {
              <div>
                <h1 className="text-3xl sm:text-4xl font-[900] tracking-tighter text-white leading-none uppercase">Autometagen AI</h1>
                <div className="flex items-center gap-2 mt-1">
-                <p className="text-[10px] font-black text-white/40 tracking-[0.3em] uppercase">User Key Pipeline</p>
+                <p className="text-[10px] font-black text-white/40 tracking-[0.3em] uppercase">User Key Pipeline by Tabo</p>
                 {deferredPrompt && (
                   <button onClick={handleInstallClick} className="text-[8px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded font-black uppercase tracking-widest border border-blue-500/20">Install App</button>
                 )}
@@ -310,31 +310,31 @@ const App: React.FC = () => {
             <button onClick={() => setActiveEngine('groq')} className={`flex-1 lg:flex-none px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeEngine === 'groq' ? 'bg-white text-black' : 'text-white/30 hover:text-white/50'}`}>Groq</button>
           </div>
           
-          <div className="w-full lg:w-auto min-w-[260px]">
+          <div className="w-full lg:w-auto min-w-[270px]">
             {activeEngine === 'gemini' ? (
-              <div className={`flex items-center gap-2 p-2 rounded-xl border transition-all ${isGeminiInvalid ? 'bg-red-500/10 border-red-500/30' : hasGeminiKey ? 'bg-green-500/10 border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.1)]' : 'bg-black/20 border-white/5'}`}>
+              <div className={`flex items-center gap-2 p-2 rounded-xl border transition-all ${isGeminiInvalid ? 'bg-red-500/10 border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.1)]' : hasGeminiKey ? 'bg-green-500/10 border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.1)]' : 'bg-black/20 border-white/5'}`}>
                 <a 
                   href="https://aistudio.google.com/app/apikey" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-white/5 text-white/40 hover:bg-white/10 hover:text-white transition-all group/key"
+                  className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-white/5 text-white/40 hover:bg-white/20 hover:text-white transition-all group/key"
                   title="Browse keys in AI Studio Storage"
                 >
                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
                 </a>
                 <span className={`text-[9px] font-black uppercase tracking-widest flex-1 ${isGeminiInvalid ? 'text-red-400' : hasGeminiKey ? 'text-green-400' : 'text-white/40'}`}>
-                  {isGeminiInvalid ? 'Invalid / Expired' : hasGeminiKey ? 'Gemini Autolocked' : 'Browse & Pick Key'}
+                  {isGeminiInvalid ? 'INVALID KEY' : hasGeminiKey ? 'AUTOLOCKED' : 'BROWSE & PICK'}
                 </span>
                 <button 
                   onClick={handleSelectGeminiKey}
-                  className={`px-3 py-1.5 text-[9px] font-black uppercase rounded-lg border transition-all active:scale-95 ${isGeminiInvalid ? 'bg-red-500 text-white border-red-400' : 'bg-white/5 hover:bg-white text-white hover:text-black border-white/10'}`}
+                  className={`px-3 py-1.5 text-[9px] font-black uppercase rounded-lg border transition-all active:scale-95 ${isGeminiInvalid ? 'bg-red-500 text-white border-red-400 animate-pulse' : 'bg-white/5 hover:bg-white text-white hover:text-black border-white/10'}`}
                 >
-                  {isGeminiInvalid ? 'Fix Key' : hasGeminiKey ? 'Change' : 'Activate'}
+                  {isGeminiInvalid ? 'FIX KEY' : hasGeminiKey ? 'CHANGE' : 'ACTIVATE'}
                 </button>
               </div>
             ) : (
-              <div className={`flex items-center gap-2 p-1.5 rounded-xl border transition-all ${isGroqInvalid ? 'bg-red-500/10 border-red-500/30' : isGroqLocked && groqKey ? 'bg-green-500/10 border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.1)]' : 'bg-black/20 border-white/10'}`}>
-                <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-white/5 text-white/20">
+              <div className={`flex items-center gap-2 p-1.5 rounded-xl border transition-all ${isGroqInvalid ? 'bg-red-500/10 border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.1)]' : isGroqLocked && groqKey ? 'bg-green-500/10 border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.1)]' : 'bg-black/20 border-white/10'}`}>
+                <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${groqKey ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-white/20'}`}>
                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
                 </div>
                 <input 
@@ -350,10 +350,12 @@ const App: React.FC = () => {
                 />
                 <button 
                   onClick={() => setIsGroqLocked(!isGroqLocked)}
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isGroqInvalid ? 'bg-red-500/20 text-red-400' : isGroqLocked ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/40 hover:bg-white/20'}`}
-                  title={isGroqInvalid ? "Key Invalid" : isGroqLocked ? "Unlock to Change" : "Lock Key"}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isGroqInvalid ? 'bg-red-500/20 text-red-400 animate-pulse' : isGroqLocked ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/40 hover:bg-white/20'}`}
+                  title={isGroqInvalid ? "Key Invalid" : isGroqLocked ? "Autolocked: Unlock to Change" : "Lock Key"}
                 >
-                  {isGroqLocked ? (
+                  {isGroqInvalid ? (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                  ) : isGroqLocked ? (
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                   ) : (
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0v4m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2z" /></svg>
@@ -447,7 +449,7 @@ const App: React.FC = () => {
       </section>
 
       <footer className="mt-auto py-16 text-center border-t border-white/5">
-        <p className="text-[11px] font-black text-white/5 uppercase tracking-[0.7em]">Autometagen AI • Professional Pipeline • v3.8</p>
+        <p className="text-[11px] font-black text-white/5 uppercase tracking-[0.7em]">Autometagen AI • User Key Pipeline by Tabo • v3.8</p>
       </footer>
     </div>
   );
